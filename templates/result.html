@@ -1,0 +1,40 @@
+{% set page_title = "نتیجه تولید لایحه" %}
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title }} - {{ page_title }}</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>📄 نتیجه تولید لایحه</h1>
+    {% if data %}
+    <details class="card">
+      <summary>نمایش خلاصه اطلاعات ارسالی</summary>
+      <ul class="kv">
+        <li><b>شماره پرونده:</b> {{ data.case_no }}</li>
+        <li><b>شعبه:</b> {{ data.branch }}</li>
+        <li><b>دادگاه:</b> {{ data.court }}</li>
+        <li><b>خواهان/شاکی:</b> {{ data.claimant }}</li>
+        <li><b>خوانده/متهم:</b> {{ data.defendant }}</li>
+        <li><b>وکیل:</b> {{ data.lawyer }}</li>
+      </ul>
+    </details>
+    {% endif %}
+
+    <article class="card output">
+      <pre>{{ generated }}</pre>
+    </article>
+
+    <div class="actions">
+      <a class="btn" href="/">↩ بازگشت و تولید لایحه جدید</a>
+    </div>
+
+    <footer class="footer">
+      <a href="https://render.com" target="_blank" rel="noopener">استقرار با Render</a>
+    </footer>
+  </main>
+</body>
+</html>

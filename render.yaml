@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: layehe-render
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    autoDeploy: true
+    envVars:
+      - key: ANTHROPIC_MODEL
+        value: claude-3-sonnet-20240229
+      - key: ANTHROPIC_API_KEY
+        fromSecret: ANTHROPIC_API_KEY

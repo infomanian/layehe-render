@@ -1,0 +1,64 @@
+/* استایل مینیمال RTL */
+:root {
+  --bg: #0f172a;
+  --card: #111827;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --accent: #22d3ee;
+  --border: #1f2937;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans Arabic", "Vazirmatn", sans-serif;
+  background: radial-gradient(1000px 600px at 90% -20%, rgba(34,211,238,0.08), rgba(0,0,0,0)) no-repeat, var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+.container {
+  max-width: 860px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+h1 { font-size: 28px; margin: 0 0 12px; }
+.muted { color: var(--muted); margin-bottom: 24px; }
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 16px 0;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+fieldset { border: 1px dashed var(--border); border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+legend { padding: 0 8px; color: var(--accent); }
+label { display: block; margin: 10px 0; }
+input[type="text"], textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: #0b1220;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  outline: none;
+}
+textarea { resize: vertical; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+button, .btn {
+  display: inline-block;
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #0b1220;
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+}
+button:hover, .btn:hover { border-color: var(--accent); }
+.footer { margin-top: 18px; color: var(--muted); font-size: 14px; }
+.output pre { white-space: pre-wrap; word-wrap: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+.kv { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.kv li { border-bottom: 1px dashed var(--border); padding-bottom: 6px; }
+.actions { margin-top: 16px; }
