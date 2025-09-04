@@ -16,6 +16,11 @@ body {
   color: var(--text);
   line-height: 1.6;
 }
+.required {
+  color: #f87171; /* قرمز ملایم */
+  margin-right: 4px;
+}
+
 .container {
   max-width: 860px;
   margin: 40px auto;

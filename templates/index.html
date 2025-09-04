@@ -1,29 +1,30 @@
 {% set page_title = "فرم تولید لایحه" %}
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title }} - {{ page_title }}</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
+
 <body>
   <main class="container">
     <h1>📝 تولید لایحه دادگاه</h1>
     <p class="muted">اطلاعات زیر را تکمیل کنید. بعد از ارسال، متن لایحه تولید و نمایش داده می‌شود.</p>
-
     <form method="post" action="/generate" class="card">
       <fieldset>
         <legend>اطلاعات پرونده</legend>
-        <label>شماره پرونده
-          <input type="text" name="case_no" placeholder="مثلاً ۱۲۳۴۵" />
+        <label>شماره پرونده <span class="required">*</span>
+          <input type="text" name="case_no" placeholder="مثلاً ۱۲۳۴۵" required />
         </label>
         <div class="grid">
           <label>شعبه
             <input type="text" name="branch" placeholder="مثلاً ۵" />
           </label>
-          <label>دادگاه
-            <input type="text" name="court" placeholder="مثلاً عمومی حقوقی تهران" />
+          <label>دادگاه <span class="required">*</span>
+            <input type="text" name="court" placeholder="مثلاً عمومی حقوقی تهران" required />
           </label>
         </div>
       </fieldset>
@@ -31,11 +32,11 @@
       <fieldset>
         <legend>مشخصات طرفین</legend>
         <div class="grid">
-          <label>خواهان/شاکی
-            <input type="text" name="claimant" placeholder="نام و نام خانوادگی" />
+          <label>خواهان/شاکی <span class="required">*</span>
+            <input type="text" name="claimant" placeholder="نام و نام خانوادگی" required />
           </label>
-          <label>خوانده/متهم
-            <input type="text" name="defendant" placeholder="نام و نام خانوادگی" />
+          <label>خوانده/متهم <span class="required">*</span>
+            <input type="text" name="defendant" placeholder="نام و نام خانوادگی" required />
           </label>
         </div>
         <label>وکیل (اختیاری)
@@ -45,12 +46,13 @@
 
       <fieldset>
         <legend>شرح ماجرا</legend>
-        <textarea name="facts" rows="5" placeholder="شرح مختصر و منظم وقایع و زمان‌بندی"></textarea>
+        <textarea name="facts" rows="5" placeholder="شرح مختصر و منظم وقایع و زمان‌بندی" required></textarea>
       </fieldset>
 
       <fieldset>
         <legend>دلایل و مستندات</legend>
-        <textarea name="evidence" rows="4" placeholder="لیست دلایل: قراردادها، رسیدها، شهادت، گزارش کارشناسی و..."></textarea>
+        <textarea name="evidence" rows="4"
+          placeholder="لیست دلایل: قراردادها، رسیدها، شهادت، گزارش کارشناسی و..."></textarea>
       </fieldset>
 
       <fieldset>
@@ -60,7 +62,8 @@
 
       <fieldset>
         <legend>درخواست پایانی</legend>
-        <textarea name="request_text" rows="3" placeholder="مثلاً رد دعوا / صدور حکم برائت / الزام خوانده به ایفای تعهد"></textarea>
+        <textarea name="request_text" rows="3" placeholder="مثلاً رد دعوا / صدور حکم برائت / الزام خوانده به ایفای تعهد"
+          required></textarea>
       </fieldset>
 
       <button type="submit">تولید لایحه</button>
@@ -71,4 +74,5 @@
     </footer>
   </main>
 </body>
+
 </html>
