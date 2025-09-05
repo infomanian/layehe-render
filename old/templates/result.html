@@ -1,16 +1,17 @@
 {% set page_title = "نتیجه تولید لایحه" %}
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title }} - {{ page_title }}</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
+
 <body>
   <main class="container">
     <h1>📄 نتیجه تولید لایحه</h1>
-
     {% if data %}
     <details class="card">
       <summary>نمایش خلاصه اطلاعات ارسالی</summary>
@@ -25,33 +26,28 @@
     </details>
     {% endif %}
 
-    {% if attachments and attachments|length > 0 %}
-    <div class="card">
-      <h3>فایل‌های پیوست شده</h3>
-      <ul>
-        {% for f in attachments %}
-        <li>{{ f }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-
     <article class="card output">
       <pre>{{ generated }}</pre>
     </article>
 
+    <div class="card">
+      <h2>لایحه تولیدشده</h2>
+      <pre>{{ result }}</pre>
+    </div>
+
     <form method="post" action="/revise" enctype="multipart/form-data" class="card">
       <fieldset>
-        <legend>اصلاح و بازتولید لایحه</legend>
+        <legend>اصلاح و بازتولید</legend>
         <label>ایرادات یا تغییرات مورد نظر خود را بنویسید:</label>
-        <textarea name="feedback" rows="5" placeholder="مثلاً بخش ۲ را رسمی‌تر کن / حذف کن..." required></textarea>
+        <textarea name="feedback" rows="5" required></textarea>
 
         <label>آپلود مستندات جدید (اختیاری):</label>
         <input type="file" name="attachments" multiple />
 
-        <button type="submit">اصلاح و بازتولید</button>
+        <button type="submit">بازنویسی لایحه</button>
       </fieldset>
     </form>
+
 
     <div class="actions">
       <a class="btn" href="/">↩ بازگشت و تولید لایحه جدید</a>
@@ -62,4 +58,5 @@
     </footer>
   </main>
 </body>
+
 </html>

@@ -1,18 +1,19 @@
 {% set page_title = "فرم تولید لایحه" %}
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title }} - {{ page_title }}</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
+
 <body>
   <main class="container">
     <h1>📝 تولید لایحه دادگاه</h1>
-    <p class="muted">فرم را پر کنید و در صورت تمایل فایل‌های مرتبط را بارگذاری کنید.</p>
-
-    <form method="post" action="/generate" class="card" enctype="multipart/form-data">
+    <p class="muted">اطلاعات زیر را تکمیل کنید. بعد از ارسال، متن لایحه تولید و نمایش داده می‌شود.</p>
+    <form method="post" action="/generate" class="card">
       <fieldset>
         <legend>اطلاعات پرونده</legend>
         <label>شماره پرونده
@@ -36,6 +37,7 @@
           </label>
           <label>خوانده/متهم <span class="required">*</span>
             <input type="text" name="defendant" placeholder="نام و نام خانوادگی" required />
+          </label>
         </div>
         <label>وکیل (اختیاری)
           <input type="text" name="lawyer" placeholder="نام وکیل یا خط تیره -" />
@@ -49,7 +51,8 @@
 
       <fieldset>
         <legend>دلایل و مستندات</legend>
-        <textarea name="evidence" rows="4" placeholder="لیست دلایل: قراردادها، رسیدها، شهادت، گزارش کارشناسی و..."></textarea>
+        <textarea name="evidence" rows="4"
+          placeholder="لیست دلایل: قراردادها، رسیدها، شهادت، گزارش کارشناسی و..."></textarea>
       </fieldset>
 
       <fieldset>
@@ -59,13 +62,15 @@
 
       <fieldset>
         <legend>درخواست پایانی</legend>
-        <textarea name="request_text" rows="3" placeholder="مثلاً رد دعوا / صدور حکم برائت / الزام خوانده به ایفای تعهد" required></textarea>
+        <textarea name="request_text" rows="3" placeholder="مثلاً رد دعوا / صدور حکم برائت / الزام خوانده به ایفای تعهد"
+          required></textarea>
       </fieldset>
 
       <fieldset>
         <legend>آپلود مستندات (اختیاری)</legend>
         <input type="file" name="attachments" multiple />
       </fieldset>
+
 
       <button type="submit">تولید لایحه</button>
     </form>
@@ -75,4 +80,5 @@
     </footer>
   </main>
 </body>
+
 </html>
