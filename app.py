@@ -1,150 +1,154 @@
 import os
-import uuid
-from fastapi import FastAPI, Request, Form, UploadFile, File, HTTPException
+import shutil
+from fastapi import FastAPI, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
-from anthropic import Anthropic
-import aiofiles
+import anthropic
 
-APP_TITLE = "لایحه‌ساز (Claude + FastAPI)"
-APP_DESC = "وب‌اپ تولید لایحه با امکان آپلود مدارک و بازتولید پس از اصلاح کاربر"
-APP_VERSION = "1.1.0"
-
-app = FastAPI(title=APP_TITLE, description=APP_DESC, version=APP_VERSION)
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "replace-me-with-secure-key"))
-
+# تنظیمات
+app = FastAPI()
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "supersecret"))
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307") # claude-opus-4-1-20250805 vs claude-3-haiku-20240307
-client = Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
-
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
+UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-def build_prompt(data: dict, attachments: list[str]=None, previous: str=None, feedback: str=None) -> str:
-    attach_text = "بدون فایل" if not attachments else "\n".join([f"- {p}" for p in attachments])
-    prev_section = f"\n\nمتن قبلی لایحه:\n{previous}\n" if previous else ""
-    feedback_section = f"\n\nاصلاحات کاربر:\n{feedback}\n" if feedback else ""
-    return f"""لطفاً بر اساس اطلاعات زیر یک لایحه رسمی دادگاه به زبان فارسی و با ساختار استاندارد (عنوان، خطاب به دادگاه، شرح وقایع، دلایل و مستندات، استدلال حقوقی، و خواسته نهایی) تنظیم کن. لحن رسمی و موجز باشد و شماره‌گذاری منظم ارائه شود.
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")# claude-opus-4-1-20250805 vs claude-3-haiku-20240307
 
-📂 اطلاعات پرونده:
-- شماره پرونونده: {data.get('case_no','-')}
-- شعبه: {data.get('branch','-')}
-- دادگاه: {data.get('court','-')}
+client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-👤 طرفین:
-- خواهان/شاکی: {data.get('claimant','-')}
-- خوانده/متهم: {data.get('defendant','-')}
-- وکیل: {data.get('lawyer','-')}
 
-📝 شرح ماجرا:
-{data.get('facts','-')}
-
-📑 دلایل و مستندات:
-{data.get('evidence','-')}
-
-⚖️ استدلال حقوقی:
-{data.get('legal','-')}
-
-📎 فایل‌های پیوست (مسیرهای ذخیره‌شده):
-{attach_text}
-
-{prev_section}{feedback_section}
-
-لطفاً متن را شفاف، رسمی و قابل خواندن برای ارائه در دادگاه تنظیم کن."""
-
-@app.get('/', response_class=HTMLResponse)
+# صفحه اصلی (فرم)
+@app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse('index.html', {'request': request, 'title': APP_TITLE})
+    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.post('/generate', response_class=HTMLResponse)
-async def generate(request: Request,
-                   case_no: str = Form(''),
-                   branch: str = Form(''),
-                   court: str = Form(''),
-                   claimant: str = Form(''),
-                   defendant: str = Form(''),
-                   lawyer: str = Form('-'),
-                   facts: str = Form(''),
-                   evidence: str = Form(''),
-                   legal: str = Form(''),
-                   request_text: str = Form(''),
-                   attachments: list[UploadFile] | None = File(None)):
-    if not ANTHROPIC_API_KEY or client is None:
-        raise HTTPException(status_code=500, detail='کلید ANTHROPIC_API_KEY تنظیم نشده است.')
+
+# تولید لایحه
+@app.post("/generate", response_class=HTMLResponse)
+async def generate_layehe(
+    request: Request,
+    case_type: str = Form(...),
+    plaintiff: str = Form(...),
+    defendant: str = Form(...),
+    case_subject: str = Form(...),
+    case_no: str = Form(""),  # اختیاری
+    details: str = Form(...),
+    attachments: list[UploadFile] = File(None)
+):
+    # ذخیره فایل‌ها
+    saved_files = []
+    file_texts = []
+    if attachments:
+        for f in attachments:
+            file_path = os.path.join(UPLOAD_DIR, f.filename)
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(f.file, buffer)
+            saved_files.append(file_path)
+            try:
+                # تلاش برای خوندن محتوای متنی
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as txt:
+                    file_texts.append(txt.read())
+            except Exception:
+                file_texts.append(f"(فایل {f.filename} بارگذاری شد ولی متن آن قابل خواندن نیست.)")
+
+    # ساخت پرامپت
+    prompt = f"""
+نوع پرونده: {case_type}
+خواهان: {plaintiff}
+خوانده: {defendant}
+موضوع دعوا: {case_subject}
+شماره پرونده: {case_no if case_no else "ذکر نشده"}
+توضیحات تکمیلی:
+{details}
+
+مستندات بارگذاری‌شده:
+{ "\n\n".join(file_texts) if file_texts else "هیچ مستندی بارگذاری نشد." }
+"""
+
     try:
-        saved = []
-        if attachments:
-            for up in attachments:
-                if up.filename:
-                    ext = os.path.splitext(up.filename)[1]
-                    fname = f"{uuid.uuid4().hex}{ext}"
-                    dest = os.path.join(UPLOAD_DIR, fname)
-                    async with aiofiles.open(dest, 'wb') as out:
-                        content = await up.read()
-                        await out.write(content)
-                    saved.append(dest)
-
-        data = {'case_no': case_no.strip(),
-                'branch': branch.strip(),
-                'court': court.strip(),
-                'claimant': claimant.strip(),
-                'defendant': defendant.strip(),
-                'lawyer': lawyer.strip(),
-                'facts': facts.strip(),
-                'evidence': evidence.strip(),
-                'legal': legal.strip(),
-                'request_text': request_text.strip()}
-
-        prompt = build_prompt(data, attachments=saved)
-        resp = client.messages.create(
+        response = client.messages.create(
             model=ANTHROPIC_MODEL,
-            max_tokens=1500,
-            messages=[{'role':'user','content':prompt}]
+            max_tokens=1000,
+            messages=[
+                {"role": "user", "content": f"بر اساس اطلاعات زیر یک پیش‌نویس لایحه حقوقی بنویس:\n{prompt}"}
+            ]
         )
-        text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
-        request.session['last_result'] = text
-        return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': text, 'data': data, 'attachments': saved})
+        result_text = response.content[0].text
     except Exception as e:
-        return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': f'❌ خطا در تولید لایحه: {e}', 'data': None, 'attachments': []}, status_code=500)
+        result_text = f"❌ خطا در تولید لایحه: {str(e)}"
 
-@app.post('/revise', response_class=HTMLResponse)
-async def revise(request: Request,
-                 feedback: str = Form(...),
-                 attachments: list[UploadFile] | None = File(None)):
-    if not ANTHROPIC_API_KEY or client is None:
-        raise HTTPException(status_code=500, detail='کلید ANTHROPIC_API_KEY تنظیم نشده است.')
+    # ذخیره در سشن برای بازتولید
+    request.session["last_inputs"] = {
+        "case_type": case_type,
+        "plaintiff": plaintiff,
+        "defendant": defendant,
+        "case_subject": case_subject,
+        "case_no": case_no,
+        "details": details,
+    }
+
+    return templates.TemplateResponse("result.html", {
+        "request": request,
+        "result": result_text,
+        "files": saved_files
+    })
+
+
+# بازتولید با اصلاحات
+@app.post("/revise", response_class=HTMLResponse)
+async def revise_layehe(
+    request: Request,
+    feedback: str = Form(...),
+    attachments: list[UploadFile] = File(None)
+):
+    last_inputs = request.session.get("last_inputs", {})
+
+    # ذخیره و خواندن فایل‌های جدید
+    saved_files = []
+    file_texts = []
+    if attachments:
+        for f in attachments:
+            file_path = os.path.join(UPLOAD_DIR, f.filename)
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(f.file, buffer)
+            saved_files.append(file_path)
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as txt:
+                    file_texts.append(txt.read())
+            except Exception:
+                file_texts.append(f"(فایل {f.filename} بارگذاری شد ولی متن آن قابل خواندن نیست.)")
+
+    # پرامپت اصلاحی
+    prompt = f"""
+پیش‌نویس لایحه اولیه بر اساس اطلاعات کاربر:
+{last_inputs}
+
+بازخورد یا اصلاحات کاربر:
+{feedback}
+
+مستندات بارگذاری‌شده جدید:
+{ "\n\n".join(file_texts) if file_texts else "هیچ مستندی اضافه نشد." }
+"""
+
     try:
-        previous = request.session.get('last_result', '')
-        saved = []
-        if attachments:
-            for up in attachments:
-                if up.filename:
-                    ext = os.path.splitext(up.filename)[1]
-                    fname = f"{uuid.uuid4().hex}{ext}"
-                    dest = os.path.join(UPLOAD_DIR, fname)
-                    async with aiofiles.open(dest, 'wb') as out:
-                        content = await up.read()
-                        await out.write(content)
-                    saved.append(dest)
-
-        data = {'case_no':'-','branch':'-','court':'-','claimant':'-','defendant':'-','lawyer':'-','facts':'-','evidence':'-','legal':'-','request_text':'-'}
-        prompt = build_prompt(data, attachments=saved, previous=previous, feedback=feedback)
-        resp = client.messages.create(
+        response = client.messages.create(
             model=ANTHROPIC_MODEL,
-            max_tokens=1500,
-            messages=[{'role':'user','content':prompt}]
+            max_tokens=1000,
+            messages=[
+                {"role": "user", "content": f"بر اساس این بازخورد، لایحه را بازنویسی کن:\n{prompt}"}
+            ]
         )
-        text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
-        request.session['last_result'] = text
-        return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': text, 'data': None, 'attachments': saved})
+        result_text = response.content[0].text
     except Exception as e:
-        return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': f'❌ خطا در بازتولید لایحه: {e}', 'data': None, 'attachments': []}, status_code=500)
+        result_text = f"❌ خطا در بازتولید لایحه: {str(e)}"
 
-@app.get('/healthz')
-async def health():
-    return {'status':'ok'}
+    return templates.TemplateResponse("result.html", {
+        "request": request,
+        "result": result_text,
+        "files": saved_files
+    })
