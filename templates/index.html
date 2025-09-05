@@ -1,12 +1,14 @@
 {% set page_title = "فرم تولید لایحه" %}
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title }} - {{ page_title }}</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
+
 <body>
   <main class="container">
     <h1>📝 تولید لایحه دادگاه</h1>
@@ -49,7 +51,8 @@
 
       <fieldset>
         <legend>دلایل و مستندات</legend>
-        <textarea name="evidence" rows="4" placeholder="لیست دلایل: قراردادها، رسیدها، شهادت، گزارش کارشناسی و..."></textarea>
+        <textarea name="evidence" rows="4"
+          placeholder="لیست دلایل: قراردادها، رسیدها، شهادت، گزارش کارشناسی و..."></textarea>
       </fieldset>
 
       <fieldset>
@@ -59,7 +62,8 @@
 
       <fieldset>
         <legend>درخواست پایانی</legend>
-        <textarea name="request_text" rows="3" placeholder="مثلاً رد دعوا / صدور حکم برائت / الزام خوانده به ایفای تعهد" required></textarea>
+        <textarea name="request_text" rows="3" placeholder="مثلاً رد دعوا / صدور حکم برائت / الزام خوانده به ایفای تعهد"
+          required></textarea>
       </fieldset>
 
       <fieldset>
@@ -67,12 +71,30 @@
         <input type="file" name="attachments" multiple />
       </fieldset>
 
-      <button type="submit">تولید لایحه</button>
+      <div id="loader" class="loader hidden"></div>
+      <button type="submit" id="submit-btn">تولید لایحه</button>
+
     </form>
 
     <footer class="footer">
       <a href="https://render.com" target="_blank" rel="noopener">استقرار با Render</a>
     </footer>
   </main>
+
+  <script>
+    const form = document.querySelector("form");
+    const loader = document.getElementById("loader");
+    const btn = document.getElementById("submit-btn");
+
+    if (form && loader && btn) {
+      form.addEventListener("submit", () => {
+        btn.disabled = true;
+        loader.classList.remove("hidden");
+      });
+    }
+  </script>
+
+
 </body>
+
 </html>

@@ -1,12 +1,14 @@
 {% set page_title = "نتیجه تولید لایحه" %}
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title }} - {{ page_title }}</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
+
 <body>
   <main class="container">
     <h1>📄 نتیجه تولید لایحه</h1>
@@ -49,7 +51,9 @@
         <label>آپلود مستندات جدید (اختیاری):</label>
         <input type="file" name="attachments" multiple />
 
-        <button type="submit">اصلاح و بازتولید</button>
+        <div id="loader" class="loader hidden"></div>
+        <button type="submit" id="submit-btn">اصلاح و بازتولید لایحه</button>
+
       </fieldset>
     </form>
 
@@ -61,5 +65,21 @@
       <a href="https://render.com" target="_blank" rel="noopener">استقرار با Render</a>
     </footer>
   </main>
+
+  <script>
+    const form = document.querySelector("form");
+    const loader = document.getElementById("loader");
+    const btn = document.getElementById("submit-btn");
+
+    if (form && loader && btn) {
+      form.addEventListener("submit", () => {
+        btn.disabled = true;
+        loader.classList.remove("hidden");
+      });
+    }
+  </script>
+
+
 </body>
+
 </html>
