@@ -17,11 +17,11 @@
     <form method="post" action="/generate" class="card" enctype="multipart/form-data">
       <fieldset>
         <legend>اطلاعات پرونده</legend>
-        <label>شماره پرونده
+        <label>شماره پرونده (اختیاری)
           <input type="text" name="case_no" placeholder="مثلاً ۱۲۳۴۵" />
         </label>
         <div class="grid">
-          <label>شعبه
+          <label>شعبه (اختیاری)
             <input type="text" name="branch" placeholder="مثلاً ۵" />
           </label>
           <label>دادگاه <span class="required">*</span>
@@ -45,23 +45,23 @@
       </fieldset>
 
       <fieldset>
-        <legend>شرح ماجرا</legend>
+        <legend>شرح ماجرا</legend><span class="required">*</span>
         <textarea name="facts" rows="5" placeholder="شرح مختصر و منظم وقایع و زمان‌بندی" required></textarea>
       </fieldset>
 
       <fieldset>
-        <legend>دلایل و مستندات</legend>
+        <legend>دلایل و مستندات</legend><span class="required">*</span>
         <textarea name="evidence" rows="4"
           placeholder="لیست دلایل: قراردادها، رسیدها، شهادت، گزارش کارشناسی و..."></textarea>
       </fieldset>
 
       <fieldset>
-        <legend>استدلال حقوقی</legend>
+        <legend>استدلال حقوقی (اختیاری)</legend>
         <textarea name="legal" rows="4" placeholder="مواد قانونی، رأی وحدت رویه، تحلیل حقوقی"></textarea>
       </fieldset>
 
       <fieldset>
-        <legend>درخواست پایانی</legend>
+        <legend>درخواست پایانی</legend><span class="required">*</span>
         <textarea name="request_text" rows="3" placeholder="مثلاً رد دعوا / صدور حکم برائت / الزام خوانده به ایفای تعهد"
           required></textarea>
       </fieldset>
