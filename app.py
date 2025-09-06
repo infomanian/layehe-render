@@ -132,17 +132,12 @@ async def generate(request: Request,
         content_blocks = [{"type": "text", "text": base_prompt}]
         content_blocks.extend(await process_attachments(attachments))
 
-        messages = [{"role": "user", "content": {"type": "text", "text": base_prompt}}]
-
-        for block in content_blocks:
-            messages.append({"role": "user", "content": block})
-
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
             max_tokens=1500,
-            messages=messages
+            messages=[
+                {'role': 'user', 'content': content_blocks}]
         )
-
         text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
         request.session['last_result'] = text
         return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': text, 'data': data, 'attachments': [a.filename for a in attachments] if attachments else []})
