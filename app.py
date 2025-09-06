@@ -28,6 +28,8 @@ client = Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
 def build_prompt(data: dict, previous: str = None, feedback: str = None) -> str:
     prev_section = f"\n\nمتن قبلی لایحه:\n{previous}\n" if previous else ""
     feedback_section = f"\n\nاصلاحات کاربر:\n{feedback}\n" if feedback else ""
+    attach_text = "این پرونده دارای پیوست (تصویر یا متن) است. لطفاً محتوای آن‌ها را نیز در تنظیم لایحه بررسی و لحاظ کن." if has_attachments else "بدون پیوست"
+
     return f"""لطفاً بر اساس اطلاعات زیر یک لایحه رسمی دادگاه به زبان فارسی و با ساختار استاندارد (عنوان، خطاب به دادگاه، شرح وقایع، دلایل و مستندات، استدلال حقوقی، و خواسته نهایی) تنظیم کن. لحن رسمی و موجز باشد و شماره‌گذاری منظم ارائه شود.
 
 📂 اطلاعات پرونده:
@@ -48,6 +50,9 @@ def build_prompt(data: dict, previous: str = None, feedback: str = None) -> str:
 
 ⚖️ استدلال حقوقی:
 {data.get('legal','-')}
+
+📎 پیوست‌ها:
+{attach_text}
 
 {prev_section}{feedback_section}
 
@@ -132,7 +137,7 @@ async def generate(request: Request,
         )
         text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
         request.session['last_result'] = text
-        return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': text, 'data': data, 'attachments': []})
+        return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': text, 'data': data, 'attachments': [a.filename for a in attachments] if attachments else []})
     except Exception as e:
         return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': f'❌ خطا در تولید لایحه: {e}', 'data': None, 'attachments': []}, status_code=500)
 
