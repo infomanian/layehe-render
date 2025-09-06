@@ -61,7 +61,10 @@ async def process_attachments(attachments: list[UploadFile]):
         for up in attachments:
             if not up.filename:
                 continue
+            MAX_FILE_SIZE = 1 * 1024 * 1024  # 2MB
             file_bytes = await up.read()
+            if len(file_bytes) > MAX_FILE_SIZE:
+                raise HTTPException(status_code=400, detail=f'فایل {up.filename} بیش از حد بزرگ است (حداکثر {MAX_FILE_SIZE // (1024*1024)}MB).')
             mime = up.content_type or "application/octet-stream"
 
             if mime.startswith("image/"):
