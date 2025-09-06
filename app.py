@@ -135,7 +135,12 @@ async def generate(request: Request,
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
             max_tokens=1500,
-            messages=[{'role': 'user', 'content': content_blocks}]
+            messages=[
+                {
+                    'role': 'user',
+                    'content': "text", "text": base_prompt},
+                    *content_blocks
+                    ]
         )
         text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
         request.session['last_result'] = text
