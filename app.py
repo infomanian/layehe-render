@@ -18,12 +18,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-if 1 == 10:
+if 1 == 1:
     ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-opus-4-1-20250805") 
-elif 0 == 1:
-    ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
 else:
-    ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-opus-20240229")
+    ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
 client = Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
 has_attachments = False
 
@@ -134,16 +132,17 @@ async def generate(request: Request,
         content_blocks = [{"type": "text", "text": base_prompt}]
         content_blocks.extend(await process_attachments(attachments))
 
+        messages = [{"role": "user", "content": {"type": "text", "text": base_prompt}}]
+
+        for block in content_blocks:
+            messages.append({"role": "user", "content": block})
+
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
             max_tokens=1500,
-            messages=[
-                {
-                    'role': 'user',
-                    'content': "text", "text": base_prompt},
-                    *content_blocks
-                    ]
+            messages=messages
         )
+
         text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
         request.session['last_result'] = text
         return templates.TemplateResponse('result.html', {'request': request, 'title': APP_TITLE, 'generated': text, 'data': data, 'attachments': [a.filename for a in attachments] if attachments else []})
