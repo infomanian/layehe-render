@@ -27,16 +27,6 @@
     </details>
     {% endif %}
 
-    {% if attachments and attachments|length > 0 %}
-    <div class="card">
-      <h3>فایل‌های پیوست شده</h3>
-      <ul>
-        {% for f in attachments %}
-        <li>{{ f }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
 
     <article class="card output">
       <pre>{{ generated }}</pre>
@@ -47,10 +37,6 @@
         <legend>اصلاح و بازتولید لایحه</legend>
         <label>ایرادات یا تغییرات مورد نظر خود را بنویسید:</label>
         <textarea name="feedback" rows="5" placeholder="مثلاً بخش ۲ را رسمی‌تر کن / حذف کن..." required></textarea>
-
-        <label>آپلود مستندات جدید (اختیاری):</label>
-        <input type="file" name="attachments" multiple />
-
         <div id="loader" class="loader hidden"></div>
         <button type="submit" id="submit-btn">اصلاح و بازتولید لایحه</button>
 

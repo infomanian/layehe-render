@@ -23,7 +23,7 @@ if 1 == 1:
 else:
     ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
 client = Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
-
+has_attachments = False
 
 def build_prompt(data: dict, previous: str = None, feedback: str = None) -> str:
     prev_section = f"\n\nمتن قبلی لایحه:\n{previous}\n" if previous else ""
@@ -63,6 +63,8 @@ async def process_attachments(attachments: list[UploadFile]):
     """فایل‌ها رو به content blocks برای Claude تبدیل می‌کنه"""
     content_blocks = []
     if attachments:
+        global has_attachments 
+        has_attachments = True
         for up in attachments:
             if not up.filename:
                 continue
@@ -144,8 +146,7 @@ async def generate(request: Request,
 
 @app.post('/revise', response_class=HTMLResponse)
 async def revise(request: Request,
-                 feedback: str = Form(...),
-                 attachments: list[UploadFile] | None = File(None)):
+                 feedback: str = Form(...)):
     if not ANTHROPIC_API_KEY or client is None:
         raise HTTPException(status_code=500, detail='کلید ANTHROPIC_API_KEY تنظیم نشده است.')
     try:
@@ -153,13 +154,12 @@ async def revise(request: Request,
         data = {'case_no': '-', 'branch': '-', 'court': '-', 'claimant': '-', 'defendant': '-', 'lawyer': '-', 'facts': '-', 'evidence': '-', 'legal': '-', 'request_text': '-'}
 
         base_prompt = build_prompt(data, previous=previous, feedback=feedback)
-        content_blocks = [{"type": "text", "text": base_prompt}]
-        content_blocks.extend(await process_attachments(attachments))
+       
 
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
             max_tokens=1500,
-            messages=[{'role': 'user', 'content': content_blocks}]
+            messages=[{'role': 'user', 'content': [{"type": "text", "text": base_prompt}]}]
         )
         text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
         request.session['last_result'] = text
