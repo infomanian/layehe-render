@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from anthropic import Anthropic
 
+
 APP_TITLE = "لایحه‌ساز (Claude + FastAPI)"
 APP_DESC = "وب‌اپ تولید لایحه با امکان آپلود مدارک و بازتولید پس از اصلاح کاربر"
 APP_VERSION = "1.2.0"
@@ -130,7 +131,9 @@ async def generate(request: Request,
 
         base_prompt = build_prompt(data)
         content_blocks = [{"type": "text", "text": base_prompt}]
-        content_blocks.extend(await process_attachments(attachments))
+        global has_attachments
+        if has_attachments:
+            content_blocks.extend(await process_attachments(attachments))
 
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
