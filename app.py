@@ -137,7 +137,7 @@ async def generate(request: Request,
 
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
-            max_tokens=4000,
+            max_tokens=2500,
             messages=[
                 {'role': 'user', 'content': content_blocks}]
         )
@@ -162,7 +162,7 @@ async def revise(request: Request,
 
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
-            max_tokens=4000,
+            max_tokens=2500,
             messages=[{'role': 'user', 'content': [{"type": "text", "text": base_prompt}]}]
         )
         text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
