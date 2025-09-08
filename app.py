@@ -19,7 +19,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-if 1 == 10:
+if 1 == 1:
     ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-opus-4-1-20250805") 
 else:
     ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
@@ -137,7 +137,7 @@ async def generate(request: Request,
 
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
-            max_tokens=2000,
+            max_tokens=4000,
             messages=[
                 {'role': 'user', 'content': content_blocks}]
         )
@@ -162,7 +162,7 @@ async def revise(request: Request,
 
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
-            max_tokens=2000,
+            max_tokens=4000,
             messages=[{'role': 'user', 'content': [{"type": "text", "text": base_prompt}]}]
         )
         text = resp.content[0].text if hasattr(resp, 'content') else str(resp)
