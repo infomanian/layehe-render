@@ -137,7 +137,7 @@ async def generate(request: Request,
 
         resp = client.messages.create(
             model=ANTHROPIC_MODEL,
-            max_tokens=1500,
+            max_tokens=4000,
             messages=[
                 {'role': 'user', 'content': content_blocks}]
         )
